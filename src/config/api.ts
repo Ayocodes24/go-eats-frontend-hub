@@ -5,39 +5,39 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 export const API_ENDPOINTS = {
   // User routes
   user: {
-    register: '/user',
-    login: '/user/login',
+    register: '${API_BASE_URL}/user',
+    login: '${API_BASE_URL}/user/login',
   },
   
   // Restaurant routes
   restaurant: {
-    menu: '/restaurant/menu',
+    menu: '${API_BASE_URL}/restaurant/menu',
   },
   
   // Cart routes
   cart: {
-    base: '/cart',
+    base: '${API_BASE_URL}/cart',
   },
   
   // Order routes
   order: {
-    base: '/order',
+    base: '${API_BASE_URL}/order',
   },
   
   // Review routes
   review: {
-    base: '/review',
+    base: '${API_BASE_URL}/review',
     byMenu: (menuId: string) => `/review/menu/${menuId}`,
   },
   
   // Delivery routes
   delivery: {
-    base: '/delivery',
+    base: '${API_BASE_URL}/delivery',
   },
   
   // Announcements
-  announcements: '/announcements/events',
+  announcements: '${API_BASE_URL}/announcements/events',
   
   // Health check
-  health: '/healthz',
+  health: '${API_BASE_URL}/healthz',
 };
