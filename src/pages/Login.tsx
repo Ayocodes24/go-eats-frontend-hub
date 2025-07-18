@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UtensilsCrossed, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { apiService } from '@/services/api';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -21,30 +22,14 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/user/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+      const data = await apiService.post<{token: string; user: any}>('/user/login', { email, password });
+      
+      login(data.token, data.user);
+      toast({
+        title: "Welcome back!",
+        description: "You've been successfully logged in.",
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        login(data.token, data.user);
-        toast({
-          title: "Welcome back!",
-          description: "You've been successfully logged in.",
-        });
-        navigate('/');
-      } else {
-        toast({
-          title: "Login failed",
-          description: data.message || "Invalid credentials. Please try again.",
-          variant: "destructive",
-        });
-      }
+      navigate('/');
     } catch (error) {
       toast({
         title: "Error",

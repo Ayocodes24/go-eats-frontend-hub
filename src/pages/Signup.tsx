@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UtensilsCrossed, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { apiService } from '@/services/api';
 
 const Signup: React.FC = () => {
   const [name, setName] = useState('');
@@ -34,30 +35,14 @@ const Signup: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/user/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
+      const data = await apiService.post<{token: string; user: any}>('/user/', { name, email, password });
+      
+      login(data.token, data.user);
+      toast({
+        title: "Account created!",
+        description: "Welcome to GO-Eats! Your account has been created successfully.",
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        login(data.token, data.user);
-        toast({
-          title: "Account created!",
-          description: "Welcome to GO-Eats! Your account has been created successfully.",
-        });
-        navigate('/');
-      } else {
-        toast({
-          title: "Signup failed",
-          description: data.message || "Failed to create account. Please try again.",
-          variant: "destructive",
-        });
-      }
+      navigate('/');
     } catch (error) {
       toast({
         title: "Error",

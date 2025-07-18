@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { apiService } from '@/services/api';
 
 interface MenuItem {
   id: string;
@@ -38,66 +39,62 @@ const Home: React.FC = () => {
 
   const fetchMenuItems = async () => {
     try {
-      const response = await fetch('/api/restaurant/menu');
-      const data = await response.json();
-      
-      if (response.ok) {
-        setMenuItems(data);
-        setFilteredItems(data);
-      } else {
-        // Mock data for demo
-        const mockData: MenuItem[] = [
-          {
-            id: '1',
-            name: 'Margherita Pizza',
-            description: 'Fresh tomatoes, mozzarella cheese, and basil on a crispy crust',
-            price: 12.99,
-            category: 'Pizza'
-          },
-          {
-            id: '2',
-            name: 'Chicken Burger',
-            description: 'Grilled chicken breast with lettuce, tomato, and our special sauce',
-            price: 8.99,
-            category: 'Burgers'
-          },
-          {
-            id: '3',
-            name: 'Caesar Salad',
-            description: 'Crisp romaine lettuce with parmesan cheese and croutons',
-            price: 7.99,
-            category: 'Salads'
-          },
-          {
-            id: '4',
-            name: 'Pasta Carbonara',
-            description: 'Creamy pasta with bacon, eggs, and parmesan cheese',
-            price: 11.99,
-            category: 'Pasta'
-          },
-          {
-            id: '5',
-            name: 'Fish Tacos',
-            description: 'Fresh grilled fish with cabbage slaw and chipotle sauce',
-            price: 9.99,
-            category: 'Mexican'
-          },
-          {
-            id: '6',
-            name: 'Chocolate Cake',
-            description: 'Rich chocolate cake with chocolate ganache',
-            price: 5.99,
-            category: 'Desserts'
-          }
-        ];
-        setMenuItems(mockData);
-        setFilteredItems(mockData);
-      }
+      const data = await apiService.get<{menu?: MenuItem[]} | MenuItem[]>('/restaurant/menu');
+      const menuItems = Array.isArray(data) ? data : (data.menu || []);
+      setMenuItems(menuItems);
+      setFilteredItems(menuItems);
     } catch (error) {
       console.error('Error fetching menu:', error);
+      // Use mock data as fallback
+      const mockData: MenuItem[] = [
+        {
+          id: '1',
+          name: 'Margherita Pizza',
+          description: 'Fresh tomatoes, mozzarella cheese, and basil on a crispy crust',
+          price: 12.99,
+          category: 'Pizza'
+        },
+        {
+          id: '2',
+          name: 'Chicken Burger',
+          description: 'Grilled chicken breast with lettuce, tomato, and our special sauce',
+          price: 8.99,
+          category: 'Burgers'
+        },
+        {
+          id: '3',
+          name: 'Caesar Salad',
+          description: 'Crisp romaine lettuce with parmesan cheese and croutons',
+          price: 7.99,
+          category: 'Salads'
+        },
+        {
+          id: '4',
+          name: 'Pasta Carbonara',
+          description: 'Creamy pasta with bacon, eggs, and parmesan cheese',
+          price: 11.99,
+          category: 'Pasta'
+        },
+        {
+          id: '5',
+          name: 'Fish Tacos',
+          description: 'Fresh grilled fish with cabbage slaw and chipotle sauce',
+          price: 9.99,
+          category: 'Mexican'
+        },
+        {
+          id: '6',
+          name: 'Chocolate Cake',
+          description: 'Rich chocolate cake with chocolate ganache',
+          price: 5.99,
+          category: 'Desserts'
+        }
+      ];
+      setMenuItems(mockData);
+      setFilteredItems(mockData);
       toast({
-        title: "Error",
-        description: "Failed to load menu items. Please try again.",
+        title: "Using demo data",
+        description: "Could not connect to backend. Showing sample menu.",
         variant: "destructive",
       });
     } finally {
@@ -116,34 +113,23 @@ const Home: React.FC = () => {
     }
 
     try {
-      const response = await fetch('/api/cart/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          menu_id: item.id,
-          quantity: 1,
-        }),
+      await apiService.post('/cart/', {
+        menu_id: item.id,
+        quantity: 1,
       });
 
-      if (response.ok) {
-        addToCart({
-          menu_id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: 1,
-          image: item.image,
-        });
-        
-        toast({
-          title: "Added to cart",
-          description: `${item.name} has been added to your cart.`,
-        });
-      } else {
-        throw new Error('Failed to add to cart');
-      }
+      addToCart({
+        menu_id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: 1,
+        image: item.image,
+      });
+      
+      toast({
+        title: "Added to cart",
+        description: `${item.name} has been added to your cart.`,
+      });
     } catch (error) {
       // Fallback to local cart
       addToCart({
