@@ -35,7 +35,7 @@ const Signup: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const data = await apiService.post<{token: string; user: any}>('/user/', { name, email, password });
+      const data = await apiService.post<{token: string; user: any}>('/user', { name, email, password });
       
       login(data.token, data.user);
       toast({
